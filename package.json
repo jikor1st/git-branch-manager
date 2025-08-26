@@ -1,0 +1,147 @@
+{
+  "name": "git-branch-manager",
+  "displayName": "Git Branch Manager",
+  "description": "Efficiently manage and clean up local Git branches in VS Code",
+  "version": "1.0.0",
+  "publisher": "git-branch-manager",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/git-branch-manager"
+  },
+  "engines": {
+    "vscode": "^1.74.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "keywords": [
+    "git",
+    "branch",
+    "cleanup",
+    "manager",
+    "version control"
+  ],
+  "activationEvents": [
+    "onCommand:gitBranchManager.refresh",
+    "onCommand:gitBranchManager.deleteSelected",
+    "onCommand:gitBranchManager.selectAll",
+    "onCommand:gitBranchManager.deselectAll",
+    "onCommand:gitBranchManager.checkout",
+    "onView:gitBranchesView"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "gitBranchManager.refresh",
+        "title": "Refresh",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "gitBranchManager.deleteSelected",
+        "title": "Delete Selected Branches",
+        "icon": "$(trash)"
+      },
+      {
+        "command": "gitBranchManager.selectAll",
+        "title": "Select All",
+        "icon": "$(check-all)"
+      },
+      {
+        "command": "gitBranchManager.deselectAll",
+        "title": "Deselect All",
+        "icon": "$(close-all)"
+      },
+      {
+        "command": "gitBranchManager.checkout",
+        "title": "Checkout Branch",
+        "icon": "$(arrow-swap)"
+      },
+      {
+        "command": "gitBranchManager.toggleSelection",
+        "title": "Toggle Selection"
+      }
+    ],
+    "views": {
+      "explorer": [
+        {
+          "id": "gitBranchesView",
+          "name": "Git Branches",
+          "icon": "$(git-branch)",
+          "contextualTitle": "Git Branch Manager"
+        }
+      ]
+    },
+    "menus": {
+      "view/title": [
+        {
+          "command": "gitBranchManager.refresh",
+          "when": "view == gitBranchesView",
+          "group": "navigation@1"
+        },
+        {
+          "command": "gitBranchManager.selectAll",
+          "when": "view == gitBranchesView",
+          "group": "navigation@2"
+        },
+        {
+          "command": "gitBranchManager.deselectAll",
+          "when": "view == gitBranchesView",
+          "group": "navigation@3"
+        },
+        {
+          "command": "gitBranchManager.deleteSelected",
+          "when": "view == gitBranchesView",
+          "group": "navigation@4"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "gitBranchManager.checkout",
+          "when": "view == gitBranchesView && viewItem == branch",
+          "group": "inline"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Git Branch Manager",
+      "properties": {
+        "gitBranchManager.confirmBeforeDelete": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show confirmation dialog before deleting branches"
+        },
+        "gitBranchManager.sortBy": {
+          "type": "string",
+          "default": "name",
+          "enum": [
+            "name",
+            "date"
+          ],
+          "description": "Sort branches by name or modification date"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js",
+    "package": "vsce package",
+    "publish": "vsce publish"
+  },
+  "devDependencies": {
+    "@types/node": "16.x",
+    "@types/vscode": "^1.74.0",
+    "@typescript-eslint/eslint-plugin": "^5.45.0",
+    "@typescript-eslint/parser": "^5.45.0",
+    "@vscode/test-electron": "^2.2.0",
+    "@vscode/vsce": "^3.6.0",
+    "eslint": "^8.28.0",
+    "glob": "^8.0.3",
+    "typescript": "^4.9.4"
+  }
+}
