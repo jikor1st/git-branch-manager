@@ -47,7 +47,16 @@ Git CLI를 사용하는 개발자들을 위한 로컬 브랜치 관리 도구로
   - 체크아웃 성공 시 UI 갱신
   - 체크아웃 실패 시 에러 메시지 표시
 
-#### 2.4 사용자 경험
+#### 2.4 실시간 브랜치 감지 (v1.1.0 추가)
+
+- **기능**: CLI 명령어로 인한 브랜치 변경 실시간 감지
+- **요구사항**:
+  - Git 파일 시스템 변경 감지 (FileSystemWatcher)
+  - 브랜치 생성/삭제/전환 자동 감지
+  - 500ms 디바운싱으로 연속 변경 처리
+  - 외부 변경 시 브랜치 목록 자동 갱신
+
+#### 2.5 사용자 경험
 
 - **기능**: 직관적이고 안전한 사용자 인터페이스
 - **요구사항**:
@@ -88,6 +97,7 @@ src/
 ├── extension.ts          # 확장 프로그램 진입점
 ├── branchManager.ts      # 브랜치 관리 로직
 ├── gitCommands.ts        # Git CLI 명령어 래퍼
+├── gitWatcher.ts         # Git 파일 시스템 감지 (v1.1.0)
 ├── treeDataProvider.ts   # 트리뷰 데이터 제공자
 ├── branchItem.ts         # 브랜치 아이템 모델
 └── utils/
@@ -130,6 +140,20 @@ class BranchItem extends vscode.TreeItem {
 }
 ```
 
+##### 3.4.4 GitWatcher 클래스 (v1.1.0 추가)
+
+```typescript
+class GitWatcher {
+  constructor(
+    private workspaceRoot: string,
+    private onBranchChange: () => void
+  );
+  - start(): void                    # 파일 감시 시작
+  - handleGitChange(reason: string): void  # Git 변경 처리
+  - dispose(): void                   # 리소스 정리
+}
+```
+
 #### 3.5 Git 명령어 매핑
 
 - **브랜치 목록**: `git branch`
@@ -144,6 +168,7 @@ class BranchItem extends vscode.TreeItem {
 - **QuickPick**: 확인 다이얼로그
 - **StatusBar**: 작업 상태 표시
 - **Notifications**: 성공/에러 메시지
+- **FileSystemWatcher**: Git 파일 변경 감지 (v1.1.0)
 
 ### 4. UI/UX 설계
 
@@ -254,26 +279,43 @@ class BranchItem extends vscode.TreeItem {
 - CHANGELOG 문서 유지
 - GitHub 릴리스 노트 작성
 
-### 10. 개발 일정 (예상)
+### 10. 버전 히스토리
 
-#### Phase 1 (1-2주)
+#### v1.0.0 (초기 릴리스)
+- 기본 브랜치 관리 기능
+- 브랜치 목록 표시
+- 브랜치 선택 및 삭제
+- 브랜치 체크아웃
+- 전체 선택/해제 기능
 
+#### v1.1.0 (실시간 업데이트)
+- **GitWatcher 클래스 추가**: Git 파일 시스템 실시간 감지
+- **자동 새로고침**: CLI 명령어 감지 시 브랜치 목록 자동 갱신
+- **감지 대상 파일**:
+  - `.git/HEAD`: 브랜치 전환 감지
+  - `.git/refs/heads/**`: 브랜치 생성/삭제 감지
+  - `.git/packed-refs`: 압축된 브랜치 감지
+  - `.git/ORIG_HEAD`: merge/rebase 작업 감지
+- **성능 최적화**: 500ms 디바운싱으로 연속 변경 효율적 처리
+- **초기 로드 개선**: 확장 프로그램 활성화 시 자동 브랜치 목록 로드
+
+### 11. 개발 일정 (완료)
+
+#### Phase 1 (완료)
 - 기본 구조 및 Git 명령어 래퍼 구현
 - 브랜치 목록 표시 기능
 
-#### Phase 2 (1주)
-
+#### Phase 2 (완료)
 - 브랜치 선택 및 삭제 기능
 - 현재 브랜치 제외 로직
 
-#### Phase 3 (1주)
-
+#### Phase 3 (완료)
 - 팝오버 메뉴 및 체크아웃 기능
 - UI/UX 개선
 
-#### Phase 4 (1주)
-
-- 테스트 및 버그 수정
+#### Phase 4 (완료)
+- 실시간 브랜치 감지 기능
+- 자동 새로고침 구현
 - 문서화 및 배포 준비
 
 ---

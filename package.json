@@ -2,7 +2,7 @@
   "name": "git-branch-manager",
   "displayName": "Git Branch Manager",
   "description": "Efficiently manage and clean up local Git branches in VS Code",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "publisher": "git-branch-manager",
   "repository": {
     "type": "git",

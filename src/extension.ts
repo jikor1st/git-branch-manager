@@ -2,9 +2,11 @@ import * as vscode from 'vscode';
 import { BranchTreeDataProvider } from './treeDataProvider';
 import { BranchManager } from './branchManager';
 import { BranchItem } from './branchItem';
+import { GitWatcher } from './gitWatcher';
 
 let treeDataProvider: BranchTreeDataProvider;
 let branchManager: BranchManager;
+let gitWatcher: GitWatcher | undefined;
 const selectedBranches = new Set<string>();
 
 export async function activate(context: vscode.ExtensionContext) {
@@ -133,6 +135,29 @@ export async function activate(context: vscode.ExtensionContext) {
         }
     });
 
+    // Set up Git watcher for real-time updates
+    const workspaceFolders = vscode.workspace.workspaceFolders;
+    if (workspaceFolders && workspaceFolders.length > 0) {
+        gitWatcher = new GitWatcher(
+            workspaceFolders[0].uri.fsPath,
+            () => {
+                console.log('Branch change detected, refreshing tree view');
+                // Clear selections when branches change externally
+                selectedBranches.clear();
+                treeDataProvider.refresh();
+            }
+        );
+        gitWatcher.start();
+        
+        context.subscriptions.push({
+            dispose: () => {
+                if (gitWatcher) {
+                    gitWatcher.dispose();
+                }
+            }
+        });
+    }
+
     context.subscriptions.push(
         refresh,
         toggleSelection,
@@ -151,4 +176,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
 export function deactivate() {
     console.log('Git Branch Manager is now deactivated');
+    if (gitWatcher) {
+        gitWatcher.dispose();
+    }
 }
