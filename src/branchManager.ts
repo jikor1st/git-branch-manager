@@ -198,4 +198,90 @@ export class BranchManager {
     isInitialized(): boolean {
         return this.isGitRepo;
     }
+
+    async hasRemoteTrackingBranch(branchName: string): Promise<boolean> {
+        if (!this.isGitRepo) {
+            return false;
+        }
+        
+        try {
+            return await this.gitCommands.hasRemoteTrackingBranch(branchName);
+        } catch (error) {
+            console.error(`Failed to check remote tracking for ${branchName}:`, error);
+            return false;
+        }
+    }
+
+    async pullBranch(branchName?: string): Promise<string> {
+        if (!this.isGitRepo) {
+            throw new Error('Not a Git repository');
+        }
+
+        try {
+            return await this.gitCommands.pullBranch(branchName);
+        } catch (error: any) {
+            throw new Error(`Failed to pull: ${error.message}`);
+        }
+    }
+
+    async renameBranch(oldName: string, newName: string): Promise<void> {
+        if (!this.isGitRepo) {
+            throw new Error('Not a Git repository');
+        }
+
+        try {
+            await this.gitCommands.renameBranch(oldName, newName);
+        } catch (error: any) {
+            throw new Error(`Failed to rename branch: ${error.message}`);
+        }
+    }
+
+    async deleteRemoteBranch(branchName: string): Promise<void> {
+        if (!this.isGitRepo) {
+            throw new Error('Not a Git repository');
+        }
+
+        try {
+            await this.gitCommands.deleteRemoteBranch(branchName);
+        } catch (error: any) {
+            throw new Error(`Failed to delete remote branch: ${error.message}`);
+        }
+    }
+
+    async pushBranch(branchName: string, setUpstream: boolean = false): Promise<void> {
+        if (!this.isGitRepo) {
+            throw new Error('Not a Git repository');
+        }
+
+        try {
+            await this.gitCommands.pushBranch(branchName, setUpstream);
+        } catch (error: any) {
+            throw new Error(`Failed to push branch: ${error.message}`);
+        }
+    }
+
+    async fetchAll(): Promise<void> {
+        if (!this.isGitRepo) {
+            throw new Error('Not a Git repository');
+        }
+
+        try {
+            await this.gitCommands.fetchAll();
+        } catch (error: any) {
+            throw new Error(`Failed to fetch: ${error.message}`);
+        }
+    }
+
+    async getBehindAheadCount(branchName: string): Promise<{ behind: number; ahead: number } | null> {
+        if (!this.isGitRepo) {
+            return null;
+        }
+
+        try {
+            return await this.gitCommands.getBehindAheadCount(branchName);
+        } catch (error) {
+            console.error(`Failed to get behind/ahead count for ${branchName}:`, error);
+            return null;
+        }
+    }
 }

@@ -123,4 +123,114 @@ export class GitCommands {
             lastCommitAuthor: author || ''
         };
     }
+
+    async getRemoteTrackingBranch(branchName: string): Promise<string | null> {
+        try {
+            const result = await this.executeGitCommand(
+                `git config --get branch.${branchName}.remote`
+            );
+            if (!result) {
+                return null;
+            }
+            
+            const remoteBranch = await this.executeGitCommand(
+                `git config --get branch.${branchName}.merge`
+            );
+            
+            if (remoteBranch) {
+                // Convert refs/heads/branch-name to remote/branch-name
+                const branchRef = remoteBranch.replace('refs/heads/', '');
+                return `${result}/${branchRef}`;
+            }
+            
+            return null;
+        } catch {
+            return null;
+        }
+    }
+
+    async hasRemoteTrackingBranch(branchName: string): Promise<boolean> {
+        const tracking = await this.getRemoteTrackingBranch(branchName);
+        return tracking !== null;
+    }
+
+    async pullBranch(branchName?: string): Promise<string> {
+        let command = 'git pull';
+        
+        if (branchName) {
+            // If specific branch is provided, checkout to it first if needed
+            const currentBranch = await this.getCurrentBranch();
+            if (currentBranch !== branchName) {
+                await this.checkoutBranch(branchName);
+            }
+        }
+        
+        try {
+            const result = await this.executeGitCommand(command);
+            return result || 'Already up to date.';
+        } catch (error: any) {
+            // Handle specific pull errors
+            if (error.message.includes('no tracking information')) {
+                throw new Error('No remote tracking branch configured. Please set upstream branch first.');
+            } else if (error.message.includes('diverged')) {
+                throw new Error('Local and remote branches have diverged. Manual merge required.');
+            } else if (error.message.includes('uncommitted changes')) {
+                throw new Error('You have uncommitted changes. Please commit or stash them first.');
+            }
+            throw error;
+        }
+    }
+
+    async fetchAll(): Promise<void> {
+        await this.executeGitCommand('git fetch --all');
+    }
+
+    async getBehindAheadCount(branchName: string): Promise<{ behind: number; ahead: number } | null> {
+        const trackingBranch = await this.getRemoteTrackingBranch(branchName);
+        if (!trackingBranch) {
+            return null;
+        }
+
+        try {
+            // Get behind count
+            const behindResult = await this.executeGitCommand(
+                `git rev-list --count ${branchName}..${trackingBranch}`
+            );
+            const behind = parseInt(behindResult) || 0;
+
+            // Get ahead count
+            const aheadResult = await this.executeGitCommand(
+                `git rev-list --count ${trackingBranch}..${branchName}`
+            );
+            const ahead = parseInt(aheadResult) || 0;
+
+            return { behind, ahead };
+        } catch {
+            return null;
+        }
+    }
+
+    async renameBranch(oldName: string, newName: string): Promise<void> {
+        const currentBranch = await this.getCurrentBranch();
+        
+        if (currentBranch === oldName) {
+            // Rename the current branch
+            await this.executeGitCommand(`git branch -m "${newName}"`);
+        } else {
+            // Rename a different branch
+            await this.executeGitCommand(`git branch -m "${oldName}" "${newName}"`);
+        }
+    }
+
+    async deleteRemoteBranch(branchName: string): Promise<void> {
+        await this.executeGitCommand(`git push origin --delete "${branchName}"`);
+    }
+
+    async pushBranch(branchName: string, setUpstream: boolean = false): Promise<void> {
+        if (setUpstream) {
+            await this.executeGitCommand(`git push -u origin "${branchName}"`);
+        } else {
+            await this.executeGitCommand(`git push origin "${branchName}"`);
+        }
+    }
 }

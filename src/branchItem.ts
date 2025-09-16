@@ -10,7 +10,6 @@ export class BranchItem extends vscode.TreeItem {
     ) {
         super(branchName, vscode.TreeItemCollapsibleState.None);
         
-        this.contextValue = 'branch';
         this.updateAppearance();
         this.setupCommand();
     }
@@ -19,13 +18,15 @@ export class BranchItem extends vscode.TreeItem {
         if (this.isCurrentBranch) {
             this.label = `${this.branchName} (current)`;
             this.iconPath = new vscode.ThemeIcon('star-full', new vscode.ThemeColor('charts.yellow'));
-            this.description = 'Active branch';
+            this.description = this.getDescription();
             this.tooltip = `Current branch: ${this.branchName}`;
+            this.contextValue = 'currentBranch';
         } else {
             this.label = this.branchName;
             this.iconPath = this.getCheckboxIcon();
             this.description = this.getDescription();
             this.tooltip = this.getTooltip();
+            this.contextValue = 'branch';
         }
     }
 
@@ -74,12 +75,13 @@ export class BranchItem extends vscode.TreeItem {
         }
         
         parts.push('Click to toggle selection');
-        parts.push('Right-click for more options');
         
         return parts.join('\n');
     }
 
     private setupCommand(): void {
+        // For non-current branches, clicking toggles selection
+        // For current branch, no default action on click
         if (!this.isCurrentBranch) {
             this.command = {
                 command: 'gitBranchManager.toggleSelection',

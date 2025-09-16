@@ -88,6 +88,21 @@ export class GitWatcher {
         
         this.fileWatchers.push(origHeadWatcher);
 
+        // Watch FETCH_HEAD for fetch/pull operations
+        const fetchHeadWatcher = vscode.workspace.createFileSystemWatcher(
+            new vscode.RelativePattern(this.workspaceRoot, '.git/FETCH_HEAD')
+        );
+        
+        fetchHeadWatcher.onDidChange(() => {
+            this.handleGitChange('FETCH_HEAD changed (pull/fetch operation)');
+        });
+        
+        fetchHeadWatcher.onDidCreate(() => {
+            this.handleGitChange('FETCH_HEAD created');
+        });
+        
+        this.fileWatchers.push(fetchHeadWatcher);
+
         // Store initial HEAD state
         this.updateLastKnownHead();
         
