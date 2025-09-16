@@ -2,7 +2,7 @@
   "name": "git-branch-manager",
   "displayName": "Git Branch Manager",
   "description": "Efficiently manage and clean up local Git branches in VS Code",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "publisher": "git-branch-manager",
   "repository": {
     "type": "git",
@@ -74,7 +74,7 @@
       {
         "command": "gitBranchManager.pullBranch",
         "title": "Pull",
-        "icon": "$(cloud-download)",
+        "icon": "$(sync)",
         "category": "Git Branch Manager"
       },
       {
@@ -85,7 +85,7 @@
       {
         "command": "gitBranchManager.renameBranch",
         "title": "Rename",
-        "icon": "$(edit)",
+        "icon": "$(pencil)",
         "category": "Git Branch Manager"
       }
     ],
@@ -132,29 +132,17 @@
         {
           "command": "gitBranchManager.checkout",
           "when": "view == gitBranchesView && viewItem == branch",
-          "group": "1_actions@1"
+          "group": "inline"
         },
         {
           "command": "gitBranchManager.pullBranch",
           "when": "view == gitBranchesView && (viewItem == branch || viewItem == currentBranch)",
-          "group": "1_actions@2"
+          "group": "inline"
         },
         {
           "command": "gitBranchManager.renameBranch",
           "when": "view == gitBranchesView && (viewItem == branch || viewItem == currentBranch)",
-          "group": "1_actions@3"
-        }
-      ],
-      "view/item/inline": [
-        {
-          "command": "gitBranchManager.pullBranch",
-          "when": "view == gitBranchesView && (viewItem == branch || viewItem == currentBranch)",
-          "group": "inline@1"
-        },
-        {
-          "command": "gitBranchManager.renameBranch",
-          "when": "view == gitBranchesView && (viewItem == branch || viewItem == currentBranch)",
-          "group": "inline@2"
+          "group": "inline"
         }
       ]
     },
@@ -204,6 +192,7 @@
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
+    "dev": "tsc -watch -p ./",
     "pretest": "npm run compile && npm run lint",
     "lint": "eslint src --ext ts",
     "test": "node ./out/test/runTest.js",
